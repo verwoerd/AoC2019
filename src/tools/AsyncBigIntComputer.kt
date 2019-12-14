@@ -1,7 +1,8 @@
 
 package tools
 
-import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
 
 /**
  * @author verwoerd
@@ -98,7 +99,7 @@ fun getValue(code: MutableMap<Long, Long>, value: Long, mode: Long, base: Long):
   }
 }
 
-suspend fun executeBigProgramAsync(orig: Map<Long, Long>, input: Channel<Long>, output: Channel<Long>) {
+suspend fun executeBigProgramAsync(orig: Map<Long, Long>, input: ReceiveChannel<Long>, output: SendChannel<Long>) {
   val code = orig.toMutableMap()
   var relativeBase = 0L
   var pointer = 0L
