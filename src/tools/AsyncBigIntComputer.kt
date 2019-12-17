@@ -173,3 +173,6 @@ suspend fun executeBigProgramAsync(orig: Map<Long, Long>, input: ReceiveChannel<
     }
   }
 }
+
+fun loadLongAsyncCode() =
+  readLine()!!.split(",").mapIndexed { index, it -> index.toLong() to it.toLong() }.toMap().toMutableMap()
