@@ -26,3 +26,10 @@ val manhattanOriginComparator = Comparator { a: Coordinate, b: Coordinate ->
 fun <V> Map<Coordinate, V>.yRange() = keys.minBy { it.y }!!.y to keys.maxBy { it.y }!!.y
 
 fun <V> Map<Coordinate, V>.xRange() = keys.minBy { it.x }!!.x to keys.maxBy { it.x }!!.x
+
+fun adjacentCoordinates(origin: Coordinate) = sequenceOf(
+  Coordinate(origin.x + 1, origin.y),
+  Coordinate(origin.x - 1, origin.y),
+  Coordinate(origin.x, origin.y + 1),
+  Coordinate(origin.x, origin.y - 1)
+                                                        )
