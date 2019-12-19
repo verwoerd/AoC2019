@@ -7,12 +7,24 @@ import kotlin.math.abs
  * @since 3-12-2019
  */
 data class Coordinate(val x: Int, val y: Int) : Comparable<Coordinate> {
-  override fun compareTo(other: Coordinate): Int = when (val result = this.y.compareTo(other.y)) {
-    0 -> this.x.compareTo(other.x)
+  override fun compareTo(other: Coordinate): Int = when (val result = y.compareTo(other.y)) {
+    0 -> x.compareTo(other.x)
     else -> result
   }
 
+  operator fun minus(other: Coordinate): Coordinate = Coordinate(x - other.x, y - other.y)
+  operator fun plus(other: Coordinate): Coordinate = Coordinate(x + other.x, y + other.y)
+  operator fun plus(i: Number): Coordinate = plus(Coordinate(i.toInt(), i.toInt()))
+  operator fun times(i: Number): Coordinate = this * Coordinate(i.toInt(), i.toInt())
+  operator fun times(other: Coordinate): Coordinate = Coordinate(x * other.x, y * other.y)
+  operator fun div(other: Coordinate): Coordinate = Coordinate(x / other.x, y / other.y)
+  infix fun plusY(i: Number): Coordinate = plus(Coordinate(0, i.toInt()))
+  infix fun plusX(i: Number): Coordinate = plus(Coordinate(i.toInt(), 0))
 }
+
+
+val xIncrement = Coordinate(1, 0)
+val yIncrement = Coordinate(0, 1)
 
 fun manhattanDistance(a: Coordinate, b: Coordinate) = abs(a.x - b.x) + abs(a.y - b.y)
 val origin = Coordinate(0, 0)
