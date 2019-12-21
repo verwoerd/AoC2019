@@ -16,7 +16,7 @@ inline fun timeSolution(body: () -> Unit) {
     e.printStackTrace()
   } finally {
     val finish = System.currentTimeMillis()
-    println("Total runtime: ${finish - start}ms")
+    println("\nTotal runtime: ${finish - start}ms")
   }
 }
 

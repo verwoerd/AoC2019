@@ -1,8 +1,15 @@
-
 package tools
 
+import day17.second.runOutputListener
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * @author verwoerd
@@ -67,7 +74,7 @@ fun executeBigProgram(orig: Map<Long, Long>, input: () -> Long, output: (Long) -
         operand3,
         mode3, relativeBase
                     )
-      9L -> relativeBase +=  getValue(code, operand1, mode1, relativeBase)
+      9L -> relativeBase += getValue(code, operand1, mode1, relativeBase)
 
       99L -> break@loop
       else -> throw IllegalArgumentException("Invalid opcode ${code[pointer]}")
@@ -82,10 +89,11 @@ fun executeBigProgram(orig: Map<Long, Long>, input: () -> Long, output: (Long) -
     }
   }
 }
+
 fun setValue(code: MutableMap<Long, Long>, value: Long, address: Long, mode: Long, base: Long) {
   return when (mode) {
     in 0L..1L -> code[address] = value
-    2L -> code[base + address]= value
+    2L -> code[base + address] = value
     else -> throw java.lang.IllegalArgumentException("Illegal parameter mode $mode")
   }
 }
@@ -158,7 +166,7 @@ suspend fun executeBigProgramAsync(orig: Map<Long, Long>, input: ReceiveChannel<
         operand3,
         mode3, relativeBase
                     )
-      9L -> relativeBase +=  getValue(code, operand1, mode1, relativeBase)
+      9L -> relativeBase += getValue(code, operand1, mode1, relativeBase)
 
       99L -> break@loop
       else -> throw IllegalArgumentException("Invalid opcode ${code[pointer]}")
@@ -176,3 +184,28 @@ suspend fun executeBigProgramAsync(orig: Map<Long, Long>, input: ReceiveChannel<
 
 fun loadLongAsyncCode() =
   readLine()!!.split(",").mapIndexed { index, it -> index.toLong() to it.toLong() }.toMap().toMutableMap()
+
+suspend fun sendCharCommands(commands: String, channel: SendChannel<Long>) {
+  delay(100)
+  commands.toCharArray().forEach {
+    channel.send(it.toLong())
+    print(it)
+  }
+  channel.send(10L)
+  println()
+}
+
+suspend fun startComputerWithCharOutput(
+  code: MutableMap<Long, Long> = loadLongAsyncCode(),
+  input: Channel<Long> = Channel(),
+  output: Channel<Long> = Channel(UNLIMITED),
+  afterStart: suspend (program: Deferred<Boolean>, input: SendChannel<Long>, output: ReceiveChannel<Long>) -> Unit
+                                       ) = coroutineScope {
+  val program = async {
+    executeBigProgramAsync(code, input, output)
+    output.close()
+  }
+  launch { runOutputListener(output) }
+  afterStart(program, input, output)
+}
+
