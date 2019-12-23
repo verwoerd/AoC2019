@@ -1,6 +1,7 @@
 package tools
 
 import day17.second.runOutputListener
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
@@ -209,3 +210,17 @@ suspend fun startComputerWithCharOutput(
   afterStart(program, input, output)
 }
 
+fun CoroutineScope.startComputerWithProducerInput(
+  code: MutableMap<Long, Long> = loadLongAsyncCode(),
+  input: ReceiveChannel<Long>,
+  output: Channel<Long> = Channel(UNLIMITED),
+  afterStart: (program: Deferred<Boolean>, output: ReceiveChannel<Long>) -> Unit
+                                                 ) {
+
+  val program = async {
+    executeBigProgramAsync(code, input, output)
+    input.cancel()
+    output.close()
+  }
+  afterStart(program, output)
+}
