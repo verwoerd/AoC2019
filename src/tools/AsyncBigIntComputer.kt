@@ -9,7 +9,6 @@ import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED
 import kotlinx.coroutines.channels.ReceiveChannel
 import kotlinx.coroutines.channels.SendChannel
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 /**
@@ -187,7 +186,6 @@ fun loadLongAsyncCode() =
   readLine()!!.split(",").mapIndexed { index, it -> index.toLong() to it.toLong() }.toMap().toMutableMap()
 
 suspend fun sendCharCommands(commands: String, channel: SendChannel<Long>) {
-  delay(100)
   commands.toCharArray().forEach {
     channel.send(it.toLong())
     print(it)
@@ -223,4 +221,18 @@ fun CoroutineScope.startComputerWithProducerInput(
     output.close()
   }
   afterStart(program, output)
+}
+
+fun CoroutineScope.startComputerWithCustomOutputAsync(
+  code: MutableMap<Long, Long> = loadLongAsyncCode(),
+  input: Channel<Long> = Channel(),
+  output: Channel<Long> = Channel(UNLIMITED),
+  afterStart: (program: Deferred<Boolean>, input: SendChannel<Long>, output: ReceiveChannel<Long>) -> Unit
+                                                     ): Deferred<Boolean> {
+  val program = async {
+    executeBigProgramAsync(code, input, output)
+    output.close()
+  }
+  afterStart(program, input, output)
+  return program
 }
